@@ -1,0 +1,48 @@
+.distributor-dashboard {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.distributor-tabs {
+  background: var(--bg-primary);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  margin-top: 2rem;
+}
+
+.distributor-tabs .tab-buttons {
+  display: flex;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0.5rem;
+  gap: 0.5rem;
+  overflow-x: auto;
+}
+
+.distributor-tabs .tab-button {
+  white-space: nowrap;
+  min-width: auto;
+}
+
+.stat-card.large {
+  padding: 2rem;
+  text-align: center;
+}
+
+.stat-card.large .stat-icon {
+  margin: 0 auto 1rem;
+  width: 80px;
+  height: 80px;
+  font-size: 2.5rem;
+}
+
+.stat-card.large .stat-info h3 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.stat-card.large .stat-info p {
+  font-size: 1rem;
+}
