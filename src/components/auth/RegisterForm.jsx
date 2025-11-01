@@ -2,9 +2,27 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { authService } from '../../services/authService';
-import { validateEmail, validatePassword } from '../../utils/helpers';
+import { validateEmail } from '../../utils/helpers';
 import LoadingSpinner from '../common/LoadingSpinner';
 import './AuthForms.css';
+
+// Función de validación de contraseña local
+const validatePassword = (password) => {
+  const errors = [];
+  if (password.length < 6) {
+    errors.push('La contraseña debe tener al menos 6 caracteres');
+  }
+  if (!/[A-Z]/.test(password)) {
+    errors.push('La contraseña debe contener al menos una letra mayúscula');
+  }
+  if (!/[0-9]/.test(password)) {
+    errors.push('La contraseña debe contener al menos un número');
+  }
+  if (!/[!@#$%^&*]/.test(password)) {
+    errors.push('La contraseña debe contener al menos un carácter especial (!@#$%^&*)');
+  }
+  return errors;
+};
 
 const RegisterForm = () => {
   const [formData, setFormData] = useState({
