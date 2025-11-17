@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { getInitials } from '../../utils/helpers';
+import { useAuth } from '../../../context/AuthContext';
+import { getInitials } from '../../../utils/helpers';
+import DarkModeToggle from './DarkModeToggle';
+import NotificationCenter from './NotificationCenter';
+import SearchAutocomplete from '../shared/SearchAutocomplete';
 import './Header.css';
 
 const Header = () => {
@@ -20,9 +23,16 @@ const Header = () => {
     return location.pathname === path;
   };
 
+  const getRoleName = () => {
+    if (!user || !user.role) return '';
+    // Si role es un objeto, extraer el nombre; si es string, usarlo directamente
+    return typeof user.role === 'object' ? user.role.nombre : user.role;
+  };
+
   const getDashboardPath = () => {
     if (!user) return '/';
-    switch (user.role) {
+    const role = getRoleName();
+    switch (role) {
       case 'admin': return '/admin';
       case 'distribuidor': return '/distributor';
       default: return '/visitor';
@@ -32,15 +42,18 @@ const Header = () => {
   return (
     <header className="header">
       <div className="header-container">
-        <div className="logo">
+        <section className="logo">
           <Link to={getDashboardPath()}>
-            <h2>🌱 Trazabilidad</h2>
+            <h2>🌱 FOODCHAIN</h2>
           </Link>
-        </div>
+        </section>
 
-        <nav className="nav">
+        <nav className="nav" aria-label="Navegación principal">
           {user && (
             <>
+              <section className="nav-search" aria-label="Búsqueda">
+                <SearchAutocomplete />
+              </section>
               <Link 
                 to="/products" 
                 className={`nav-link ${isActive('/products') ? 'active' : ''}`}
@@ -48,7 +61,7 @@ const Header = () => {
                 Productos
               </Link>
 
-              {user.role === 'admin' && (
+              {getRoleName() === 'admin' && (
                 <Link 
                   to="/admin" 
                   className={`nav-link ${isActive('/admin') ? 'active' : ''}`}
@@ -57,7 +70,7 @@ const Header = () => {
                 </Link>
               )}
 
-              {user.role === 'distribuidor' && (
+              {getRoleName() === 'distribuidor' && (
                 <>
                   <Link 
                     to="/distributor/inventory" 
@@ -77,38 +90,44 @@ const Header = () => {
           )}
         </nav>
 
-        <div className="user-menu">
+        <section className="header-actions" aria-label="Acciones del usuario">
+          <DarkModeToggle />
+          {user && <NotificationCenter />}
           {user ? (
-            <div className="user-info">
+            <section className="user-info">
               <button 
                 className="user-btn"
                 onClick={() => setShowMenu(!showMenu)}
+                aria-label="Menú de usuario"
+                aria-expanded={showMenu}
               >
-                <div className="user-avatar">
+                <span className="user-avatar" aria-hidden="true">
                   {getInitials(user.nombre)}
-                </div>
-                <span className="user-name">{user.nombre}</span>
-                <span className="user-role">({user.role})</span>
+                </span>
+                <span className="user-name">{user.nombre || 'Usuario'}</span>
+                <span className="user-role">({getRoleName()})</span>
               </button>
 
               {showMenu && (
-                <div className="dropdown-menu">
-                  <button 
-                    className="dropdown-item"
-                    onClick={handleLogout}
-                  >
-                    Cerrar Sesión
-                  </button>
-                </div>
+                <menu className="dropdown-menu" role="menu">
+                  <li role="menuitem">
+                    <button 
+                      className="dropdown-item"
+                      onClick={handleLogout}
+                    >
+                      Cerrar Sesión
+                    </button>
+                  </li>
+                </menu>
               )}
-            </div>
+            </section>
           ) : (
-            <div className="auth-links">
+            <nav className="auth-links" aria-label="Enlaces de autenticación">
               <Link to="/login" className="btn btn-outline">Iniciar Sesión</Link>
               <Link to="/register" className="btn btn-primary">Registrarse</Link>
-            </div>
+            </nav>
           )}
-        </div>
+        </section>
       </div>
     </header>
   );

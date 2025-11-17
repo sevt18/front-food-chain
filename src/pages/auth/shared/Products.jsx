@@ -1,5 +1,5 @@
 import React from 'react';
-import ProductList from '../../components/shared/ProductList';
+import ProductList from '../../../components/auth/shared/ProductList';
 
 const Products = () => {
   return (

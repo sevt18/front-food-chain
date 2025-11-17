@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext';
-import { adminService } from '../../services/adminService';
-import { productService } from '../../services/productService';
-import LoadingSpinner from '../../components/common/LoadingSpinner';
-import UserManagement from '../../components/admin/UserManagement';
-import ProductManagement from '../../components/admin/ProductManagement';
+import { useAuth } from '../../../context/AuthContext';
+import { adminService } from '../../../services/adminService';
+import LoadingSpinner from '../../../components/auth/common/LoadingSpinner';
+import UserManagement from '../../../components/auth/admin/UserManagement';
+import ProductManagement from '../../../components/auth/admin/ProductManagement';
+import AdminCharts from '../../../components/auth/admin/AdminCharts';
+import AuditLogs from '../../../components/auth/admin/AuditLogs';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -19,23 +20,24 @@ const AdminDashboard = () => {
 
   const loadStats = async () => {
     try {
-      // En un caso real, tendrías un endpoint específico para stats
-      const [usersResponse, productsResponse] = await Promise.all([
-        adminService.getAllUsers(),
-        productService.getProducts()
-      ]);
-
-      const users = usersResponse.data;
-      const products = productsResponse.data;
+      const statsResponse = await adminService.getStats();
+      const statsData = statsResponse.data;
 
       setStats({
-        totalUsers: users.length,
-        totalProducts: products.length,
-        activeUsers: users.filter(u => u.activo).length,
-        availableProducts: products.filter(p => p.isAvailable).length
+        totalUsers: statsData.totalUsers || 0,
+        totalProducts: statsData.totalProducts || 0,
+        totalDistributors: statsData.totalDistributors || 0,
+        totalVisitors: statsData.totalVisitors || 0
       });
     } catch (error) {
       console.error('Error loading stats:', error);
+      // En caso de error, establecer valores por defecto
+      setStats({
+        totalUsers: 0,
+        totalProducts: 0,
+        totalDistributors: 0,
+        totalVisitors: 0
+      });
     } finally {
       setLoading(false);
     }
@@ -46,67 +48,89 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="admin-dashboard">
-      <div className="dashboard-header">
+    <article className="admin-dashboard">
+      <header className="dashboard-header">
         <h1>Panel de Administración</h1>
         <p>Bienvenido, {user?.nombre}</p>
-      </div>
+      </header>
 
       {stats && (
-        <div className="stats-grid">
-          <div className="stat-card">
-            <div className="stat-icon">👥</div>
+        <section className="stats-grid" aria-label="Estadísticas del sistema">
+          <article className="stat-card">
+            <span className="stat-icon" aria-hidden="true">👥</span>
             <div className="stat-info">
               <h3>{stats.totalUsers}</h3>
               <p>Usuarios Totales</p>
             </div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-icon">📦</div>
+          </article>
+          <article className="stat-card">
+            <span className="stat-icon" aria-hidden="true">📦</span>
             <div className="stat-info">
               <h3>{stats.totalProducts}</h3>
               <p>Productos Totales</p>
             </div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-icon">✅</div>
+          </article>
+          <article className="stat-card">
+            <span className="stat-icon" aria-hidden="true">🚚</span>
             <div className="stat-info">
-              <h3>{stats.activeUsers}</h3>
-              <p>Usuarios Activos</p>
+              <h3>{stats.totalDistributors}</h3>
+              <p>Distribuidores</p>
             </div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-icon">🔄</div>
+          </article>
+          <article className="stat-card">
+            <span className="stat-icon" aria-hidden="true">👤</span>
             <div className="stat-info">
-              <h3>{stats.availableProducts}</h3>
-              <p>Productos Disponibles</p>
+              <h3>{stats.totalVisitors}</h3>
+              <p>Visitantes</p>
             </div>
-          </div>
-        </div>
+          </article>
+        </section>
       )}
 
-      <div className="admin-tabs">
-        <div className="tab-buttons">
+      <section className="admin-tabs">
+        <nav className="tab-buttons" aria-label="Navegación de pestañas">
           <button
             className={`tab-button ${activeTab === 'users' ? 'active' : ''}`}
             onClick={() => setActiveTab('users')}
+            aria-selected={activeTab === 'users'}
+            role="tab"
           >
             👥 Gestión de Usuarios
           </button>
           <button
             className={`tab-button ${activeTab === 'products' ? 'active' : ''}`}
             onClick={() => setActiveTab('products')}
+            aria-selected={activeTab === 'products'}
+            role="tab"
           >
             📦 Gestión de Productos
           </button>
-        </div>
+          <button
+            className={`tab-button ${activeTab === 'charts' ? 'active' : ''}`}
+            onClick={() => setActiveTab('charts')}
+            aria-selected={activeTab === 'charts'}
+            role="tab"
+          >
+            📊 Gráficos y Reportes
+          </button>
+          <button
+            className={`tab-button ${activeTab === 'audit' ? 'active' : ''}`}
+            onClick={() => setActiveTab('audit')}
+            aria-selected={activeTab === 'audit'}
+            role="tab"
+          >
+            📋 Historial de Auditoría
+          </button>
+        </nav>
 
-        <div className="tab-content">
+        <section className="tab-content" role="tabpanel">
           {activeTab === 'users' && <UserManagement />}
           {activeTab === 'products' && <ProductManagement />}
-        </div>
-      </div>
-    </div>
+          {activeTab === 'charts' && <AdminCharts />}
+          {activeTab === 'audit' && <AuditLogs />}
+        </section>
+      </section>
+    </article>
   );
 };
 

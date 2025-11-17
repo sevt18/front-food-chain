@@ -5,11 +5,15 @@ export const ROLES = {
 };
 
 export const PRODUCT_TYPES = [
-  'Agricola',
-  'Pecuario',
-  'Industrial',
-  'Textil',
-  'Electronico',
+  'Fruta',
+  'Verdura',
+  'Cereal',
+  'Legumbre',
+  'Carne',
+  'Pescado',
+  'Lácteo',
+  'Bebida',
+  'Conserva',
   'Otro'
 ];
 

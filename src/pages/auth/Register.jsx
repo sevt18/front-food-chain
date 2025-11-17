@@ -2,7 +2,7 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import RegisterForm from '../../components/auth/RegisterForm';
-import './AuthPages.css';
+import '../AuthPages.css';
 
 const Register = () => {
   const { user } = useAuth();
@@ -12,31 +12,33 @@ const Register = () => {
   }
 
   return (
-    <div className="auth-page">
+    <main className="auth-page">
       <div className="auth-container">
-        <div className="auth-hero">
-          <h1>Únete a Nuestra Plataforma</h1>
-          <p>Crea tu cuenta y comienza a gestionar la trazabilidad de tus productos</p>
-          <div className="features">
-            <div className="feature">
-              <span>👥</span>
+        <section className="auth-hero">
+          <header>
+            <h1>Únete a Nuestra Plataforma</h1>
+            <p>Crea tu cuenta y comienza a gestionar la trazabilidad de tus productos</p>
+          </header>
+          <ul className="features" role="list">
+            <li className="feature">
+              <span aria-hidden="true">👥</span>
               <span>Diferentes tipos de usuario</span>
-            </div>
-            <div className="feature">
-              <span>📈</span>
+            </li>
+            <li className="feature">
+              <span aria-hidden="true">📈</span>
               <span>Gestión optimizada</span>
-            </div>
-            <div className="feature">
-              <span>🔒</span>
+            </li>
+            <li className="feature">
+              <span aria-hidden="true">🔒</span>
               <span>Datos protegidos</span>
-            </div>
-          </div>
-        </div>
-        <div className="auth-form-section">
+            </li>
+          </ul>
+        </section>
+        <section className="auth-form-section">
           <RegisterForm />
-        </div>
+        </section>
       </div>
-    </div>
+    </main>
   );
 };
 

@@ -5,19 +5,19 @@ const Modal = ({ isOpen, onClose, title, children, size = 'medium' }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className={`modal-content ${size}`} onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
+    <dialog className="modal-overlay" onClick={onClose} open>
+      <article className={`modal-content ${size}`} onClick={(e) => e.stopPropagation()}>
+        <header className="modal-header">
           <h3>{title}</h3>
-          <button className="modal-close" onClick={onClose}>
+          <button className="modal-close" onClick={onClose} aria-label="Cerrar modal">
             ×
           </button>
-        </div>
-        <div className="modal-body">
+        </header>
+        <section className="modal-body">
           {children}
-        </div>
-      </div>
-    </div>
+        </section>
+      </article>
+    </dialog>
   );
 };
 

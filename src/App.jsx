@@ -1,30 +1,40 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import Layout from './components/common/Layout';
+import Layout from './components/auth/common/Layout';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
-import AdminDashboard from './pages/admin/AdminDashboard';
-import DistributorDashboard from './pages/distributor/DistributorDashboard';
-import VisitorDashboard from './pages/visitor/VisitorDashboard';
-import Products from './pages/shared/Products';
-import Inventory from './pages/distributor/Inventory';
-import Batches from './pages/distributor/Batches';
-import LoadingSpinner from './components/common/LoadingSpinner';
-import './App.css';
+import AdminDashboard from './pages/auth/admin/AdminDashboard';
+import DistributorDashboard from './pages/auth/distributor/DistributorDashboard';
+import VisitorDashboard from './pages/auth/visitor/VisitorDashboard';
+import Products from './pages/auth/shared/Products';
+import ProductDetail from './pages/auth/shared/ProductDetail';
+import Inventory from './pages/auth/distributor/Inventory';
+import Batches from './pages/auth/distributor/Batches';
+import LoadingSpinner from './components/auth/common/LoadingSpinner';
+import './styles/App.css';
 
 const ProtectedRoute = ({ children, requiredRole }) => {
   const { user, loading } = useAuth();
   
   if (loading) {
-    return <LoadingSpinner text="Verificando autenticación..." />;
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <LoadingSpinner text="Verificando autenticación..." />
+      </div>
+    );
   }
   
   if (!user) {
     return <Navigate to="/login" replace />;
   }
   
-  if (requiredRole && user.role !== requiredRole) {
+  const getRoleName = () => {
+    if (!user || !user.role) return '';
+    return typeof user.role === 'object' ? user.role.nombre : user.role;
+  };
+
+  if (requiredRole && getRoleName() !== requiredRole) {
     return <Navigate to="/" replace />;
   }
   
@@ -35,7 +45,11 @@ const PublicRoute = ({ children }) => {
   const { user, loading } = useAuth();
   
   if (loading) {
-    return <LoadingSpinner text="Cargando..." />;
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <LoadingSpinner text="Cargando..." />
+      </div>
+    );
   }
   
   if (user) {
@@ -48,10 +62,17 @@ const PublicRoute = ({ children }) => {
 function AppContent() {
   const { user } = useAuth();
 
+  const getRoleName = () => {
+    if (!user || !user.role) return '';
+    // Si role es un objeto, extraer el nombre; si es string, usarlo directamente
+    return typeof user.role === 'object' ? user.role.nombre : user.role;
+  };
+
   const getDefaultRoute = () => {
     if (!user) return '/login';
     
-    switch (user.role) {
+    const role = getRoleName();
+    switch (role) {
       case 'admin': return '/admin';
       case 'distribuidor': return '/distributor';
       default: return '/visitor';
@@ -59,7 +80,7 @@ function AppContent() {
   };
 
   return (
-    <Router>
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
         {/* Public Routes */}
         <Route path="/login" element={
@@ -112,6 +133,11 @@ function AppContent() {
           <Route path="/products" element={
             <ProtectedRoute>
               <Products />
+            </ProtectedRoute>
+          } />
+          <Route path="/products/:id" element={
+            <ProtectedRoute>
+              <ProductDetail />
             </ProtectedRoute>
           } />
         </Route>

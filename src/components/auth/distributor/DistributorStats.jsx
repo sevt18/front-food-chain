@@ -1,14 +1,27 @@
 import React from 'react';
-import { distributorService } from '../../services/distributorService';
-import { useApi } from '../../hooks/useApi';
-import LoadingSpinner from '../../components/common/LoadingSpinner';
+import { distributorService } from '../../../services/distributorService';
+import { useApi } from '../../../hooks/useApi';
+import LoadingSpinner from '../common/LoadingSpinner';
 import './DistributorComponents.css';
 
 const DistributorStats = () => {
   const { data: stats, loading, error } = useApi(distributorService.getStats);
 
   if (loading) return <LoadingSpinner text="Cargando estadísticas..." />;
-  if (error) return <div className="error-message">{error}</div>;
+  if (error) {
+    // Si es un error 404, mostrar mensaje más amigable
+    if (error.response?.status === 404 || (typeof error === 'string' && error.includes('404'))) {
+      return (
+        <div className="info-message" style={{ padding: '2rem', textAlign: 'center' }}>
+          <p>⚠️ El endpoint de estadísticas aún no está disponible en el backend.</p>
+          <p style={{ marginTop: '1rem', color: 'var(--text-secondary)' }}>
+            Esta funcionalidad estará disponible cuando el backend implemente la ruta <code>/api/distributor/stats</code>
+          </p>
+        </div>
+      );
+    }
+    return <div className="error-message">Error al cargar estadísticas: {typeof error === 'string' ? error : error.message}</div>;
+  }
 
   return (
     <div className="distributor-stats">

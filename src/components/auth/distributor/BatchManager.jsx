@@ -1,14 +1,19 @@
 import React, { useState } from 'react';
-import { batchService } from '../../services/batchService';
-import { productService } from '../../services/productService';
-import { useApi } from '../../hooks/useApi';
-import LoadingSpinner from '../../components/common/LoadingSpinner';
-import Modal from '../../components/common/Modal';
+import { batchService } from '../../../services/batchService';
+import { productService } from '../../../services/productService';
+import { useApi } from '../../../hooks/useApi';
+import LoadingSpinner from '../common/LoadingSpinner';
+import Modal from '../common/Modal';
 import './DistributorComponents.css';
 
 const BatchManager = () => {
   const { data: batches, loading, error, refetch } = useApi(batchService.getBatches);
-  const { data: products } = useApi(productService.getProducts);
+  const { data: productsResponse } = useApi(productService.getProducts);
+  
+  // Normalizar productos: puede venir como array directo, objeto con data, o objeto paginado
+  const products = Array.isArray(productsResponse) 
+    ? productsResponse 
+    : productsResponse?.data || productsResponse?.products || [];
   const [showModal, setShowModal] = useState(false);
   const [editingBatch, setEditingBatch] = useState(null);
   const [formData, setFormData] = useState({
@@ -106,7 +111,20 @@ const BatchManager = () => {
   };
 
   if (loading) return <LoadingSpinner text="Cargando lotes..." />;
-  if (error) return <div className="error-message">{error}</div>;
+  if (error) {
+    // Si es un error 404, mostrar mensaje más amigable
+    if (error.response?.status === 404 || (typeof error === 'string' && error.includes('404'))) {
+      return (
+        <div className="info-message" style={{ padding: '2rem', textAlign: 'center' }}>
+          <p>⚠️ El endpoint de lotes aún no está disponible en el backend.</p>
+          <p style={{ marginTop: '1rem', color: 'var(--text-secondary)' }}>
+            Esta funcionalidad estará disponible cuando el backend implemente la ruta <code>/api/distributor/batches</code>
+          </p>
+        </div>
+      );
+    }
+    return <div className="error-message">Error al cargar lotes: {typeof error === 'string' ? error : error.message}</div>;
+  }
 
   return (
     <div className="batch-manager">
@@ -188,7 +206,7 @@ const BatchManager = () => {
               required
             >
               <option value="">Seleccionar producto</option>
-              {products?.map(product => (
+              {Array.isArray(products) && products.map(product => (
                 <option key={product.id} value={product.id}>
                   {product.nombre} - {product.codigoTrazabilidad}
                 </option>

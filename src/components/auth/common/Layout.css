@@ -1,17 +1,25 @@
-.layout {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
+/* Layout ahora usa fragmento, los estilos se aplican al main directamente */
 
 .main-content {
   flex: 1;
-  padding-top: 2rem;
-  padding-bottom: 2rem;
+  padding-top: 2.5rem;
+  padding-bottom: 3rem;
+  position: relative;
 }
 
 .main-content .container {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 0 2rem;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding-top: 1.5rem;
+    padding-bottom: 2rem;
+  }
+  
+  .main-content .container {
+    padding: 0 1rem;
+  }
 }

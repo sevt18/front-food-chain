@@ -1,5 +1,5 @@
 import React from 'react';
-import InventoryManager from '../../components/distributor/InventoryManager';
+import InventoryManager from '../../../components/auth/distributor/InventoryManager';
 
 const Inventory = () => {
   return (

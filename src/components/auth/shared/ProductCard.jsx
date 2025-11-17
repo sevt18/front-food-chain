@@ -34,40 +34,56 @@ const ProductCard = ({ product }) => {
   const status = getStatusBadge(product);
 
   return (
-    <div className="product-card">
-      <div className="product-image">
-        <div className="product-avatar">
+    <article className="product-card">
+      <figure className="product-image">
+        <span className="product-avatar" aria-label={`Imagen de ${product.nombre}`}>
           {product.nombre?.charAt(0).toUpperCase()}
-        </div>
-      </div>
+        </span>
+      </figure>
       
-      <div className="product-content">
-        <div className="product-header">
+      <section className="product-content">
+        <header className="product-header">
           <h3>{product.nombre}</h3>
           <span className={`status-badge ${status.class}`}>
             {status.text}
           </span>
-        </div>
+        </header>
         
-        <div className="product-details">
-          <p className="product-type">{product.tipo}</p>
-          <p className="product-code">Código: {product.codigoTrazabilidad}</p>
-          <div className="product-rating">
-            <span className="stars">{getRatingStars(product.rating)}</span>
-            <span className="rating-value">({product.rating})</span>
+        <dl className="product-details">
+          <div>
+            <dt className="sr-only">Tipo</dt>
+            <dd className="product-type">{product.tipo}</dd>
           </div>
-          <p className="production-date">
-            Producido: {new Date(product.fechaProduccion).toLocaleDateString()}
-          </p>
-        </div>
+          <div>
+            <dt className="sr-only">Código de trazabilidad</dt>
+            <dd className="product-code">Código: {product.codigoTrazabilidad}</dd>
+          </div>
+          <div className="product-rating">
+            <dt className="sr-only">Calificación</dt>
+            <dd>
+              <span className="stars" aria-label={`Calificación: ${product.rating} de 5 estrellas`}>
+                {getRatingStars(product.rating)}
+              </span>
+              <span className="rating-value">({product.rating})</span>
+            </dd>
+          </div>
+          <div>
+            <dt className="sr-only">Fecha de producción</dt>
+            <dd className="production-date">
+              Producido: <time dateTime={product.fechaProduccion}>
+                {new Date(product.fechaProduccion).toLocaleDateString()}
+              </time>
+            </dd>
+          </div>
+        </dl>
         
-        <div className="product-actions">
+        <nav className="product-actions" aria-label="Acciones del producto">
           <Link to={`/products/${product.id}`} className="btn btn-outline btn-sm">
             Ver Detalles
           </Link>
-        </div>
-      </div>
-    </div>
+        </nav>
+      </section>
+    </article>
   );
 };
 

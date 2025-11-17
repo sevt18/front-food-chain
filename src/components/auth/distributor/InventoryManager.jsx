@@ -1,14 +1,19 @@
 import React, { useState } from 'react';
-import { inventoryService } from '../../services/inventoryService';
-import { productService } from '../../services/productService';
-import { useApi } from '../../hooks/useApi';
-import LoadingSpinner from '../../components/common/LoadingSpinner';
-import Modal from '../../components/common/Modal';
+import { inventoryService } from '../../../services/inventoryService';
+import { productService } from '../../../services/productService';
+import { useApi } from '../../../hooks/useApi';
+import LoadingSpinner from '../common/LoadingSpinner';
+import Modal from '../common/Modal';
 import './DistributorComponents.css';
 
 const InventoryManager = () => {
   const { data: inventory, loading, error, refetch } = useApi(inventoryService.getInventory);
-  const { data: products } = useApi(productService.getProducts);
+  const { data: productsResponse } = useApi(productService.getProducts);
+  
+  // Normalizar productos: puede venir como array directo, objeto con data, o objeto paginado
+  const products = Array.isArray(productsResponse) 
+    ? productsResponse 
+    : productsResponse?.data || productsResponse?.products || [];
   const [showModal, setShowModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState('');
   const [quantity, setQuantity] = useState('');
@@ -56,7 +61,20 @@ const InventoryManager = () => {
   };
 
   if (loading) return <LoadingSpinner text="Cargando inventario..." />;
-  if (error) return <div className="error-message">{error}</div>;
+  if (error) {
+    // Si es un error 404, mostrar mensaje más amigable
+    if (error.response?.status === 404) {
+      return (
+        <div className="info-message" style={{ padding: '2rem', textAlign: 'center' }}>
+          <p>⚠️ El endpoint de inventario aún no está disponible en el backend.</p>
+          <p style={{ marginTop: '1rem', color: 'var(--text-secondary)' }}>
+            Esta funcionalidad estará disponible cuando el backend implemente la ruta <code>/api/distributor/inventory</code>
+          </p>
+        </div>
+      );
+    }
+    return <div className="error-message">Error al cargar inventario: {error.message}</div>;
+  }
 
   return (
     <div className="inventory-manager">
@@ -149,7 +167,7 @@ const InventoryManager = () => {
               required
             >
               <option value="">Seleccionar producto</option>
-              {products?.map(product => (
+              {Array.isArray(products) && products.map(product => (
                 <option key={product.id} value={product.id}>
                   {product.nombre} - {product.codigoTrazabilidad}
                 </option>

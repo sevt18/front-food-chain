@@ -1,5 +1,5 @@
 import React from 'react';
-import BatchManager from '../../components/distributor/BatchManager';
+import BatchManager from '../../../components/auth/distributor/BatchManager';
 
 const Batches = () => {
   return (

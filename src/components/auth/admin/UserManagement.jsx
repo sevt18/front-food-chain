@@ -1,15 +1,26 @@
-import React, { useState } from 'react';
-import { adminService } from '../../services/adminService';
-import { useApi } from '../../hooks/useApi';
+import React, { useState, useEffect } from 'react';
+import { adminService } from '../../../services/adminService';
+import { useApi } from '../../../hooks/useApi';
 import LoadingSpinner from '../common/LoadingSpinner';
 import Modal from '../common/Modal';
 import './AdminComponents.css';
 
 const UserManagement = () => {
   const { data: users, loading, error, refetch } = useApi(adminService.getAllUsers);
+  const { data: roles, loading: rolesLoading, error: rolesError } = useApi(adminService.getAllRoles);
   const [selectedUser, setSelectedUser] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
+
+  // Debug: mostrar roles en consola
+  useEffect(() => {
+    if (roles) {
+      console.log('Roles cargados:', roles);
+    }
+    if (rolesError) {
+      console.error('Error al cargar roles:', rolesError);
+    }
+  }, [roles, rolesError]);
 
   const handleAssignRole = async (userId, newRoleId) => {
     setActionLoading(true);
@@ -32,11 +43,11 @@ const UserManagement = () => {
   if (error) return <div className="error-message">{error}</div>;
 
   return (
-    <div className="user-management">
-      <div className="section-header">
+    <section className="user-management">
+      <header className="section-header">
         <h2>Gestión de Usuarios</h2>
         <p>Total: {users?.length || 0} usuarios registrados</p>
-      </div>
+      </header>
 
       <div className="table-container">
         <table className="data-table">
@@ -64,16 +75,29 @@ const UserManagement = () => {
                 </td>
                 <td>{user.correo}</td>
                 <td>
-                  <select 
-                    value={user.rolId} 
-                    onChange={(e) => handleAssignRole(user.id, e.target.value)}
-                    disabled={actionLoading}
-                    className="role-select"
-                  >
-                    <option value="1">Visitante</option>
-                    <option value="2">Distribuidor</option>
-                    <option value="3">Administrador</option>
-                  </select>
+                  {rolesLoading ? (
+                    <span>Cargando roles...</span>
+                  ) : rolesError ? (
+                    <span className="error-text">Error al cargar roles</span>
+                  ) : (
+                    <select 
+                      value={user.rolId || ''} 
+                      onChange={(e) => handleAssignRole(user.id, parseInt(e.target.value))}
+                      disabled={actionLoading || rolesLoading}
+                      className="role-select"
+                    >
+                      <option value="">Seleccionar rol</option>
+                      {roles && roles.length > 0 ? (
+                        roles.map(role => (
+                          <option key={role.id} value={role.id}>
+                            {role.nombre.charAt(0).toUpperCase() + role.nombre.slice(1)}
+                          </option>
+                        ))
+                      ) : (
+                        <option disabled>No hay roles disponibles</option>
+                      )}
+                    </select>
+                  )}
                 </td>
                 <td>{new Date(user.createdAt).toLocaleDateString()}</td>
                 <td>
@@ -118,7 +142,7 @@ const UserManagement = () => {
           </div>
         )}
       </Modal>
-    </div>
+    </section>
   );
 };
 

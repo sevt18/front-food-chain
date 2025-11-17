@@ -2,7 +2,7 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import LoginForm from '../../components/auth/LoginForm';
-import './AuthPages.css';
+import '../AuthPages.css';
 
 const Login = () => {
   const { user } = useAuth();
@@ -12,31 +12,33 @@ const Login = () => {
   }
 
   return (
-    <div className="auth-page">
+    <main className="auth-page">
       <div className="auth-container">
-        <div className="auth-hero">
-          <h1>Bienvenido al Sistema de Trazabilidad</h1>
-          <p>Gestiona y rastrea tus productos de manera eficiente y transparente</p>
-          <div className="features">
-            <div className="feature">
-              <span>🔍</span>
+        <section className="auth-hero">
+          <header>
+            <h1>Bienvenido a FOODCHAIN</h1>
+            <p>Gestiona y rastrea tus productos de manera eficiente y transparente</p>
+          </header>
+          <ul className="features" role="list">
+            <li className="feature">
+              <span aria-hidden="true">🔍</span>
               <span>Seguimiento en tiempo real</span>
-            </div>
-            <div className="feature">
-              <span>📊</span>
+            </li>
+            <li className="feature">
+              <span aria-hidden="true">📊</span>
               <span>Reportes detallados</span>
-            </div>
-            <div className="feature">
-              <span>🛡️</span>
+            </li>
+            <li className="feature">
+              <span aria-hidden="true">🛡️</span>
               <span>Seguridad garantizada</span>
-            </div>
-          </div>
-        </div>
-        <div className="auth-form-section">
+            </li>
+          </ul>
+        </section>
+        <section className="auth-form-section">
           <LoginForm />
-        </div>
+        </section>
       </div>
-    </div>
+    </main>
   );
 };
 

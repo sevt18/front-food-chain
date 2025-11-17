@@ -1,0 +1,40 @@
+.dark-mode-toggle {
+  background: var(--bg-secondary, #f8fafc);
+  border: 2px solid var(--border-light, #e5e7eb);
+  border-radius: var(--border-radius, 8px);
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  font-size: 1.25rem;
+  transition: all var(--transition-base, 0.2s ease);
+  box-shadow: var(--shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.05));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  height: 44px;
+  line-height: 1;
+}
+
+.dark-mode-toggle:hover {
+  background: var(--primary-lighter, #d1fae5);
+  border-color: var(--primary-color, #10b981);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md, 0 4px 6px rgba(0, 0, 0, 0.1));
+}
+
+.dark-mode-toggle:active {
+  transform: translateY(0);
+}
+
+/* Modo oscuro */
+html.dark-mode .dark-mode-toggle {
+  background: var(--bg-secondary, #1f2937);
+  border-color: var(--border-color, #374151);
+  color: var(--text-primary, #f9fafb);
+}
+
+html.dark-mode .dark-mode-toggle:hover {
+  background: rgba(34, 197, 94, 0.1);
+  border-color: var(--primary-color, #10b981);
+}
+

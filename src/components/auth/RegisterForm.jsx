@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { authService } from '../../services/authService';
+import { useApi } from '../../hooks/useApi';
 import { validateEmail } from '../../utils/helpers';
-import LoadingSpinner from '../common/LoadingSpinner';
+import LoadingSpinner from './common/LoadingSpinner';
 import './AuthForms.css';
 
 // Función de validación de contraseña local
@@ -25,6 +26,7 @@ const validatePassword = (password) => {
 };
 
 const RegisterForm = () => {
+  const { data: roles, loading: rolesLoading } = useApi(authService.getAvailableRoles);
   const [formData, setFormData] = useState({
     nombre: '',
     correo: '',
@@ -38,6 +40,16 @@ const RegisterForm = () => {
   
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  // Establecer el primer rol como predeterminado cuando se carguen los roles
+  useEffect(() => {
+    if (roles && roles.length > 0) {
+      setFormData(prev => ({
+        ...prev,
+        userType: prev.userType || roles[0].nombre
+      }));
+    }
+  }, [roles]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -88,22 +100,21 @@ const RegisterForm = () => {
       const userData = {
         nombre: formData.nombre,
         correo: formData.correo,
-        password: formData.password
+        password: formData.password,
+        userType: formData.userType
       };
 
-      let response;
-      if (formData.userType === 'distribuidor') {
-        response = await authService.registerDistributor(userData);
-      } else {
-        response = await authService.registerUser(userData);
-      }
+      // Usar el endpoint genérico de registro que acepta el rol
+      const response = await authService.registerUser(userData);
 
       const { token, user } = response.data;
       
       await login(user, token);
       
       // Redirigir según el rol
-      switch (user.role) {
+      // Si role es un objeto, extraer el nombre; si es string, usarlo directamente
+      const roleName = typeof user.role === 'object' ? user.role.nombre : user.role;
+      switch (roleName) {
         case 'admin':
           navigate('/admin');
           break;
@@ -114,7 +125,21 @@ const RegisterForm = () => {
           navigate('/visitor');
       }
     } catch (error) {
-      setError(error.response?.data?.message || 'Error al registrar usuario');
+      console.error('Error al registrar:', error);
+      
+      // Mensajes de error más específicos
+      if (error.code === 'ECONNREFUSED' || error.message?.includes('Network Error')) {
+        setError('No se pudo conectar con el servidor. Verifica que el backend esté corriendo en el puerto 3306.');
+      } else if (error.response) {
+        // El servidor respondió con un código de error
+        const message = error.response.data?.message || error.response.data?.error || 'Error al registrar usuario';
+        setError(message);
+      } else if (error.request) {
+        // La petición se hizo pero no hubo respuesta
+        setError('El servidor no respondió. Verifica que el backend esté corriendo.');
+      } else {
+        setError(error.message || 'Error al registrar usuario');
+      }
     } finally {
       setLoading(false);
     }
@@ -157,16 +182,32 @@ const RegisterForm = () => {
 
         <div className="form-group">
           <label htmlFor="userType">Tipo de Usuario:</label>
-          <select
-            id="userType"
-            name="userType"
-            value={formData.userType}
-            onChange={handleChange}
-            disabled={loading}
-          >
-            <option value="visitante">Visitante</option>
-            <option value="distribuidor">Distribuidor</option>
-          </select>
+          {rolesLoading ? (
+            <select disabled>
+              <option>Cargando roles...</option>
+            </select>
+          ) : (
+            <select
+              id="userType"
+              name="userType"
+              value={formData.userType}
+              onChange={handleChange}
+              disabled={loading}
+            >
+              {roles && roles.length > 0 ? (
+                roles.map(role => (
+                  <option key={role.id} value={role.nombre}>
+                    {role.nombre.charAt(0).toUpperCase() + role.nombre.slice(1)}
+                  </option>
+                ))
+              ) : (
+                <>
+                  <option value="visitante">Visitante</option>
+                  <option value="distribuidor">Distribuidor</option>
+                </>
+              )}
+            </select>
+          )}
         </div>
         
         <div className="form-group">

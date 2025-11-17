@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { authService } from '../../services/authService';
 import { validateEmail } from '../../utils/helpers';
-import LoadingSpinner from '../common/LoadingSpinner';
+import LoadingSpinner from './common/LoadingSpinner';
 import './AuthForms.css';
 
 const LoginForm = () => {
@@ -50,7 +50,9 @@ const LoginForm = () => {
       await login(user, token);
       
       // Redirigir según el rol
-      switch (user.role) {
+      // Si role es un objeto, extraer el nombre; si es string, usarlo directamente
+      const roleName = typeof user.role === 'object' ? user.role.nombre : user.role;
+      switch (roleName) {
         case 'admin':
           navigate('/admin');
           break;
@@ -61,7 +63,21 @@ const LoginForm = () => {
           navigate('/visitor');
       }
     } catch (error) {
-      setError(error.response?.data?.message || 'Error al iniciar sesión');
+      console.error('Error al iniciar sesión:', error);
+      
+      // Mensajes de error más específicos
+      if (error.code === 'ECONNREFUSED' || error.message?.includes('Network Error')) {
+        setError('No se pudo conectar con el servidor. Verifica que el backend esté corriendo en el puerto 3306.');
+      } else if (error.response) {
+        // El servidor respondió con un código de error
+        const message = error.response.data?.message || error.response.data?.error || 'Error al iniciar sesión';
+        setError(message);
+      } else if (error.request) {
+        // La petición se hizo pero no hubo respuesta
+        setError('El servidor no respondió. Verifica que el backend esté corriendo.');
+      } else {
+        setError(error.message || 'Error al iniciar sesión');
+      }
     } finally {
       setLoading(false);
     }
